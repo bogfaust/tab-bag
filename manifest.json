@@ -1,12 +1,13 @@
 {
 	"manifest_version": 3,
 	"name": "Tab Bag",
-	"version": "0.0.3",
+	"version": "0.0.5",
 	"description": "Collects URLs from all open tabs or restore",
 	"permissions": [
 		"tabs",
 		"windows",
-		"storage"
+		"storage",
+		"tabGroups"
 	],
 	"action": {
 		"default_popup": "popup.html"

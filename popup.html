@@ -3,123 +3,313 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    body {
-      width: 400px;
-      padding: 15px;
-      font-family: Arial, sans-serif;
-      background-color: #1a1a1a;
-      color: #e0e0e0;
+    :root {
+      --bg: #1a1a1a; --surface: #2b2b2b; --border: #404040;
+      --text: #e0e0e0; --text-muted: #808080;
+      --accent: #4CAF50; --accent-dark: #2c5530; --accent-hover: #367d3c;
+      --input-bg: #1a1a1a; --btn-bg: #222222;
+      --stop-bg: #853232; --stop-hover: #a04141;
+      --tab-active-bg: #2b2b2b; --tab-inactive-bg: #1a1a1a;
+      --sub-bg: #1e1e1e;
     }
-    .top-bar {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 8px;
+    [data-theme="light"] {
+      --bg: #f5f5f5; --surface: #ffffff; --border: #d0d0d0;
+      --text: #1a1a1a; --text-muted: #666666;
+      --accent: #2e7d32; --accent-dark: #c8e6c9; --accent-hover: #388e3c;
+      --input-bg: #ffffff; --btn-bg: #f0f0f0;
+      --stop-bg: #c62828; --stop-hover: #d32f2f;
+      --tab-active-bg: #ffffff; --tab-inactive-bg: #e8e8e8;
+      --sub-bg: #f8f8f8;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { width: 420px; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
+
+    /* top bar */
+    .top-bar { display: flex; justify-content: flex-end; padding: 8px 12px 0; }
     .btn-settings {
-      background: none;
-      border: 1px solid #404040;
-      border-radius: 4px;
-      color: #808080;
-      font-size: 12px;
-      padding: 3px 9px;
-      cursor: pointer;
-      transition: color 0.2s, border-color 0.2s;
-      width: auto;
+      background: none; border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text-muted); font-size: 12px; padding: 3px 9px; cursor: pointer;
+      transition: color .2s, border-color .2s; width: auto;
     }
-    .btn-settings:hover { color: #e0e0e0; border-color: #666; }
-    .button-group {
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
+    .btn-settings:hover { color: var(--text); border-color: var(--text-muted); }
+
+    /* outer tab switcher */
+    .tab-switcher { display: flex; border-bottom: 1px solid var(--border); margin: 8px 0 0; }
+    .tab-btn {
+      flex: 1; padding: 8px 0; font-size: 13px;
+      background: var(--tab-inactive-bg); border: none;
+      border-bottom: 2px solid transparent; color: var(--text-muted);
+      cursor: pointer; transition: color .15s, border-color .15s, background .15s;
+      width: auto; border-radius: 0;
     }
+    .tab-btn.active { background: var(--tab-active-bg); color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    /* inner sub-tab switcher (inside Groups panel) */
+    .sub-tab-switcher {
+      display: flex; border: 1px solid var(--border); border-radius: 4px;
+      overflow: hidden; margin-bottom: 10px;
+    }
+    .sub-tab-btn {
+      flex: 1; padding: 6px 4px; font-size: 12px;
+      background: var(--sub-bg); border: none; color: var(--text-muted);
+      cursor: pointer; transition: color .15s, background .15s;
+      width: auto; border-radius: 0; border-right: 1px solid var(--border);
+    }
+    .sub-tab-btn:last-child { border-right: none; }
+    .sub-tab-btn.active { background: var(--accent-dark); color: var(--text); }
+    [data-theme="light"] .sub-tab-btn.active { color: #1a1a1a; }
+    .sub-tab-btn:hover:not(.active) { color: var(--text); }
+
+    .sub-panel { display: none; }
+    .sub-panel.active { display: block; }
+
+    /* panels & layout */
+    .tab-panel { display: none; padding: 12px; }
+    .tab-panel.active { display: block; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px; margin-bottom: 10px; }
+
+    /* generic button */
     button {
-      padding: 8px 12px;
-      background-color: #2c5530;
-      color: #ffffff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      width: 100%;
-      text-align: center;
+      padding: 8px 12px; background: var(--accent-dark); color: var(--text);
+      border: none; border-radius: 4px; cursor: pointer;
+      transition: background .2s; width: 100%; text-align: center; font-size: 13px;
     }
-    button:hover { background-color: #367d3c; }
-    button.stop { background-color: #853232; }
-    button.stop:hover { background-color: #a04141; }
+    [data-theme="light"] button { color: #1a1a1a; }
+    button:hover { background: var(--accent-hover); }
+    button.stop { background: var(--stop-bg); }
+    button.stop:hover { background: var(--stop-hover); }
+    [data-theme="light"] button.stop, [data-theme="light"] button.stop:hover { color: #fff; }
+
+    .button-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
     textarea {
-      width: 100%;
-      height: 200px;
-      margin: 10px 0;
-      padding: 8px;
-      box-sizing: border-box;
-      border: 1px solid #404040;
-      border-radius: 4px;
-      resize: vertical;
-      background-color: #2b2b2b;
-      color: #e0e0e0;
+      width: 100%; height: 160px; padding: 8px;
+      border: 1px solid var(--border); border-radius: 4px; resize: vertical;
+      background: var(--input-bg); color: var(--text); font-size: 13px; margin: 8px 0;
     }
-    textarea::placeholder { color: #808080; }
-    textarea:focus { outline: none; border-color: #367d3c; }
-    .status { margin-top: 10px; color: #808080; }
-    .status.error { color: #e57373; }
-    .info-panel {
-      margin-top: 10px;
-      padding: 10px;
-      background-color: #2b2b2b;
-      border-radius: 4px;
-      border: 1px solid #404040;
+    textarea::placeholder { color: var(--text-muted); }
+    textarea:focus { outline: none; border-color: var(--accent); }
+    .settings-panel, .info-panel {
+      padding: 10px; background: var(--surface);
+      border-radius: 4px; border: 1px solid var(--border); margin-bottom: 8px;
     }
-    .tabs-info { color: #4CAF50; font-weight: bold; }
-    .settings-panel {
-      margin: 10px 0;
-      padding: 10px;
-      background-color: #2b2b2b;
-      border-radius: 4px;
-      border: 1px solid #404040;
-    }
-    .setting-item {
-      margin: 8px 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .setting-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+    .setting-item:last-child { margin-bottom: 0; }
+    .setting-item input[type="checkbox"] { margin-top: 2px; }
+    .setting-item label { flex: 1; line-height: 1.4; }
+    /* sub-checkboxes indented */
+    .sub-setting { display: flex; align-items: flex-start; gap: 8px; margin: 4px 0 0 22px; font-size: 12px; color: var(--text-muted); }
+    .sub-setting.hidden { display: none; }
+    .sub-setting input[type="checkbox"] { margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; }
+    .sub-setting label { flex: 1; line-height: 1.4; cursor: pointer; }
+
     input[type="number"] {
-      background-color: #1a1a1a;
-      border: 1px solid #404040;
-      color: #e0e0e0;
-      padding: 4px 8px;
-      border-radius: 4px;
-      width: 100px;
+      background: var(--input-bg); border: 1px solid var(--border); color: var(--text);
+      padding: 4px 8px; border-radius: 4px; width: 90px; font-size: 13px;
     }
-    input[type="checkbox"] { margin: 0; accent-color: #4CAF50; }
+    input[type="checkbox"] { margin: 0; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+    .tabs-info { color: var(--accent); font-weight: bold; font-size: 13px; }
+    .status { margin-top: 6px; color: var(--text-muted); font-size: 12px; min-height: 16px; }
+    .status.error { color: #e57373; }
+    [data-theme="light"] .status.error { color: #c62828; }
+
+    /* section label */
+    .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); margin-bottom: 8px; }
+
+    /* save row */
+    .group-save-row { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; }
+    .group-save-row input[type="text"] {
+      flex: 1; background: var(--input-bg); border: 1px solid var(--border); color: var(--text);
+      padding: 6px 8px; border-radius: 4px; font-size: 13px; min-width: 0;
+    }
+    .group-save-row input[type="text"]::placeholder { color: var(--text-muted); }
+    .group-save-row input[type="text"]:focus { outline: none; border-color: var(--accent); }
+    .btn-save-group { padding: 6px 10px; font-size: 13px; width: auto; white-space: nowrap; flex-shrink: 0; }
+
+    /* group item */
+    .group-item {
+      background: var(--btn-bg); border: 1px solid var(--border);
+      border-radius: 4px; margin-bottom: 5px; overflow: hidden;
+    }
+    .group-item:last-child { margin-bottom: 0; }
+    .group-item-header {
+      display: flex; align-items: center; gap: 6px; padding: 6px 8px; cursor: default;
+    }
+    .group-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .group-expand-btn {
+      background: none; border: none; padding: 0 2px; width: auto;
+      color: var(--text-muted); font-size: 11px; cursor: pointer; flex-shrink: 0;
+      line-height: 1; transition: color .15s;
+    }
+    .group-expand-btn:hover { background: none; color: var(--text); }
+    .group-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .group-count { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+    .btn-sm { padding: 3px 9px; font-size: 12px; width: auto; white-space: nowrap; flex-shrink: 0; }
+    .btn-sm-outline {
+      padding: 3px 9px; font-size: 12px; width: auto; white-space: nowrap; flex-shrink: 0;
+      background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+    }
+    .btn-sm-outline:hover { background: var(--stop-bg); color: #fff; border-color: transparent; }
+
+    /* expandable URL list */
+    .group-urls {
+      display: none; padding: 0 8px 8px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .group-urls.open { display: block; }
+    .group-url-item {
+      font-size: 11px; color: var(--text-muted); padding: 2px 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      border-bottom: 1px solid var(--border);
+    }
+    .group-url-item:last-child { border-bottom: none; }
+    .group-urls-inner { max-height: 120px; overflow-y: auto; margin-top: 6px; }
+
+    .no-items { font-size: 12px; color: var(--text-muted); text-align: center; padding: 6px 0; }
+
+    /* group options */
+    .group-options { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 8px; }
+
+    /* Chrome group item */
+    .chrome-group-item {
+      background: var(--btn-bg); border: 1px solid var(--border);
+      border-radius: 4px; margin-bottom: 5px; overflow: hidden;
+    }
+    .chrome-group-item:last-child { margin-bottom: 0; }
+    .chrome-group-header { display: flex; align-items: center; gap: 6px; padding: 6px 8px; }
+    .chrome-group-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chrome-group-count { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+    /* preview URL list under chrome group */
+    .chrome-group-urls { display: none; padding: 0 8px 8px 24px; border-top: 1px solid var(--border); }
+    .chrome-group-urls.open { display: block; }
+    .chrome-group-save-row { display: flex; gap: 6px; align-items: center; padding: 6px 8px 8px; border-top: 1px solid var(--border); }
+    .chrome-group-save-row input[type="text"] {
+      flex: 1; background: var(--input-bg); border: 1px solid var(--border); color: var(--text);
+      padding: 5px 8px; border-radius: 4px; font-size: 12px; min-width: 0;
+    }
+    .chrome-group-save-row input[type="text"]::placeholder { color: var(--text-muted); }
+    .chrome-group-save-row input[type="text"]:focus { outline: none; border-color: var(--accent); }
   </style>
 </head>
 <body>
   <div class="top-bar">
     <button class="btn-settings" id="openSettings">⚙ Settings</button>
   </div>
-  <div class="button-group">
-    <button id="collectUrls">Collect tab URLs</button>
-    <button id="collectSelectedUrls">Collect selected tabs</button>
-    <button id="openUrls">Open URLs in new tabs</button>
+
+  <div class="tab-switcher">
+    <button class="tab-btn active" data-tab="classic" id="tabBtnClassic">Classic</button>
+    <button class="tab-btn" data-tab="groups" id="tabBtnGroups">Groups</button>
   </div>
-  <div class="settings-panel">
-    <div class="setting-item">
-      <input type="checkbox" id="skipDuplicates" checked>
-      <label for="skipDuplicates" id="labelSkipDuplicates">Skip duplicate URLs</label>
+
+  <!-- ── Classic ── -->
+  <div class="tab-panel active" id="panelClassic">
+    <div class="button-group">
+      <button id="collectUrls">Collect tab URLs</button>
+      <button id="collectSelectedUrls">Collect selected tabs</button>
+      <button id="openUrls">Open URLs in new tabs</button>
     </div>
-    <div class="setting-item">
-      <label for="delay" id="labelDelay">Delay between opening tabs (ms):</label>
-      <input type="number" id="delay" value="0" min="0" step="100">
+    <div class="settings-panel">
+      <div class="setting-item">
+        <input type="checkbox" id="skipDuplicates" checked>
+        <label for="skipDuplicates" id="labelSkipDuplicates">Skip duplicate URLs</label>
+      </div>
+      <div class="setting-item">
+        <label for="delay" id="labelDelay">Delay (ms):</label>
+        <input type="number" id="delay" value="0" min="0" step="100">
+      </div>
     </div>
+    <textarea id="urlList" placeholder="Enter URLs (one per line)"></textarea>
+    <div class="info-panel stats-block">
+      <div id="statsTitle" style="font-size:12px;color:var(--text-muted);margin-bottom:2px">Stats:</div>
+      <div id="tabsInfo" class="tabs-info">Open tabs: 0</div>
+    </div>
+    <div id="status" class="status"></div>
   </div>
-  <textarea id="urlList" placeholder="Enter URLs (one per line)"></textarea>
-  <div class="info-panel">
-    <div id="statsTitle">Stats:</div>
-    <div id="tabsInfo" class="tabs-info">Open tabs: 0</div>
+
+  <!-- ── Groups ── -->
+  <div class="tab-panel" id="panelGroups">
+    <!-- sub-tabs -->
+    <div class="sub-tab-switcher">
+      <button class="sub-tab-btn active" data-sub="restoration" id="subBtnRestoration">Restore Groups</button>
+      <button class="sub-tab-btn" data-sub="saving" id="subBtnSaving">Save Chrome Groups</button>
+    </div>
+
+    <!-- sub: restoration -->
+    <div class="sub-panel active" id="subPanelRestoration">
+      <div class="panel">
+        <div class="section-label" id="sectionGroups">Restore Groups</div>
+
+        <div id="groupsList"></div>
+
+        <!-- Restore-all + conflict check row -->
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn-sm" id="restoreAllBtn" style="flex:1;white-space:normal;font-size:11px;line-height:1.3;padding:4px 6px">Restore all groups</button>
+          <button class="btn-sm-outline" id="checkConflictsBtn" style="flex:1;white-space:normal;font-size:11px;line-height:1.3;padding:4px 6px">Check conflicts</button>
+        </div>
+
+        <div class="group-options">
+          <div class="setting-item">
+            <input type="checkbox" id="groupSkipExistingGroups" checked>
+            <label for="groupSkipExistingGroups" id="labelSkipExistingGroups">Don't restore groups already open</label>
+          </div>
+          <div class="setting-item">
+            <input type="checkbox" id="groupTopUpMissing">
+            <label for="groupTopUpMissing" id="labelTopUpMissing">Top up group with missing URLs</label>
+          </div>
+          <div class="setting-item">
+            <input type="checkbox" id="groupSkipExistingUrls" checked>
+            <label for="groupSkipExistingUrls" id="labelSkipExistingUrls">Skip URLs already open anywhere</label>
+          </div>
+          <div class="sub-setting" id="subSettingConflict">
+            <input type="checkbox" id="groupReportConflicts">
+            <label for="groupReportConflicts" id="labelReportConflicts">Report conflict before opening (show which tab)</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- sub: saving (Chrome groups + save from all tabs) -->
+    <div class="sub-panel" id="subPanelSaving">
+
+      <!-- Save from all open tabs -->
+      <div class="panel">
+        <div class="section-label" id="sectionSaveFromTabs">Save All Open Tabs as Group</div>
+        <div class="group-save-row">
+          <input type="text" id="groupName" maxlength="60">
+          <button class="btn-save-group" id="saveGroupBtn">💾</button>
+        </div>
+        <!-- Color picker -->
+        <div id="groupColorPicker" style="display:flex;gap:5px;flex-wrap:wrap;margin:6px 0 2px"></div>
+        <!-- Preview list of open tabs -->
+        <div id="savePreviewWrap" style="display:none">
+          <div class="group-urls-inner" id="savePreviewList" style="margin-bottom:6px"></div>
+        </div>
+        <button class="btn-sm" id="togglePreviewBtn" style="width:auto;font-size:12px;margin-top:2px">👁 Preview tabs to save</button>
+        <div class="setting-item" style="margin-top:8px">
+          <input type="checkbox" id="ignoreGroupedTabs">
+          <label for="ignoreGroupedTabs" id="labelIgnoreGroupedTabs">Ignore tabs that are part of a group</label>
+        </div>
+        <div class="setting-item" style="margin-top:4px">
+          <input type="checkbox" id="deduplicateSave" checked>
+          <label for="deduplicateSave" id="labelDeduplicateSave">Save only unique URLs</label>
+          <span id="deduplicateSaveHint" title="" style="cursor:help;color:var(--text-muted);font-size:12px;margin-left:2px;flex-shrink:0">&#9432;</span>
+        </div>
+      </div>
+
+      <!-- Current Chrome groups -->
+      <div class="panel">
+        <div class="section-label" id="sectionChromeGroups">Current Chrome Groups</div>
+        <div id="chromeGroupsList"></div>
+      </div>
+    </div>
+
+    <div class="info-panel stats-block">
+      <div id="statsTitleGroups" style="font-size:12px;color:var(--text-muted);margin-bottom:2px">Stats:</div>
+      <div id="tabsInfoGroups" class="tabs-info">Open tabs: 0</div>
+    </div>
+    <div id="statusGroups" class="status"></div>
   </div>
-  <div id="status" class="status"></div>
+
   <script src="popup.js"></script>
 </body>
 </html>
